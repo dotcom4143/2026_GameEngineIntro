@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class playercontroler : MonoBehaviour
 {
     private Vector2 moveInput;
+    public float moveSpeed = 7f;
 
     public void OnMove(InputValue value)
     {
@@ -20,6 +21,6 @@ public class playercontroler : MonoBehaviour
         {
             transform.localScale = new Vector3 (-1, 1, 1);
         }
-        transform.Translate(Vector3.right * moveInput.x * Time.deltaTime);
+        transform.Translate(Vector3.right * moveSpeed * moveInput.x * Time.deltaTime);
     }
 }
