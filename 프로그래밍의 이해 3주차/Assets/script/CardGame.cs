@@ -6,8 +6,16 @@ using System.Collections;
 public class CardGame : MonoBehaviour
 {
     public List<Card> cards;
+    public List<Sprite> sprites;
+
     private Card firstCard = null;
     private Card secondCard = null;
+
+    private bool isChecking = false;
+
+    public int cardPairNum;
+    private int maxPairNum = 14;
+    private int minPairNum = 1;
 
     void Start()
     {
@@ -16,15 +24,25 @@ public class CardGame : MonoBehaviour
 
     private void StartGame()
     {
+        isChecking = false;
         List<int> randomPairNumbers = GeneratePairNumbers(cards.Count);
 
         for (int i = 0; i < cards.Count; ++i)
         {
-            cards[i].SetCardNumber(randomPairNumbers[i]);
+            int num = randomPairNumbers[i];
+            cards[i].SetCardNumber(num);
+
+            if (num < sprites.Count)
+            {
+                cards[i].SetImage(sprites[num]);
+            }
+
             cards[i].isFront = false;
+            cards[i].isMatched = false;
+            cards[i].ChangeColor(Color.white);
+            cards[i].SetStartRotation();
         }
     }
-
 
     private void CheckCard()
     {
@@ -33,11 +51,12 @@ public class CardGame : MonoBehaviour
             firstCard.isMatched = true;
             secondCard.isMatched = true;
 
-            firstCard.ChangeColor(Color.magenta);
-            secondCard.ChangeColor(Color.magenta);
+            firstCard.ChangeColor(Color.black);
+            secondCard.ChangeColor(Color.black);
 
             firstCard = null;
             secondCard = null;
+            isChecking = false;
         }
         else
         {
@@ -52,10 +71,15 @@ public class CardGame : MonoBehaviour
 
         firstCard = null;
         secondCard = null;
+        isChecking = false;
     }
 
     public void OnClickCard(Card card)
     {
+        if (isChecking || card.isMatched || card == firstCard) return;
+
+        card.isFront = true;
+
         if (firstCard == null)
         {
             firstCard = card;
@@ -63,15 +87,10 @@ public class CardGame : MonoBehaviour
         else
         {
             secondCard = card;
-        }
-
-        if (firstCard != null && secondCard != null)
-        {
+            isChecking = true;
             CheckCard();
         }
-
     }
-
 
     List<int> GeneratePairNumbers(int cardCount)
     {
@@ -94,5 +113,4 @@ public class CardGame : MonoBehaviour
 
         return newCardNumbers;
     }
-
 }

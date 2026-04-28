@@ -6,25 +6,48 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-
     public TextMeshProUGUI text;
+
     public int cardNumber;
+
     public float rotationSpeed;
-    public bool isFront = true;
+
+    public bool isFront = false;
     public bool isMatched = false;
-    private Quaternion flipRotation = Quaternion.Euler(0, 180f, 0);
-    private Quaternion originRotation = Quaternion.Euler(0, 0, 0);
+
+    private Sprite mySpriteImage;
+    public Sprite defaultSprite;
+
+    private Vector3 flipScale = new Vector3(-1, 1, 1);
+    private Vector3 originScale = new Vector3(1, 1, 1);
+
     public CardGame cardGame;
-    
+
     void Update()
     {
         if (isFront)
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, originRotation, rotationSpeed * Time.deltaTime);
+            transform.localScale = Vector3.Lerp(transform.localScale, originScale, rotationSpeed * Time.deltaTime);
+
+            if (text != null)
+            {
+                text.gameObject.SetActive(true);
+                text.transform.localScale = new Vector3(1, 1, 1);
+            }
+
+            if (mySpriteImage != null) GetComponent<Image>().sprite = mySpriteImage;
         }
         else
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, flipRotation, rotationSpeed * Time.deltaTime);
+            transform.localScale = Vector3.Lerp(transform.localScale, flipScale, rotationSpeed * Time.deltaTime);
+
+            if (text != null)
+            {
+                text.gameObject.SetActive(false);
+                text.transform.localScale = new Vector3(-1, 1, 1);
+            }
+
+            GetComponent<Image>().sprite = defaultSprite;
         }
     }
 
@@ -33,15 +56,18 @@ public class Card : MonoBehaviour
         if (!isMatched)
         {
             cardGame.OnClickCard(this);
-            isFront = !isFront;
         }
+    }
 
-
+    public void SetStartRotation()
+    {
+        transform.localScale = flipScale;
+        if (text != null) text.gameObject.SetActive(false);
     }
 
     public void SetCardNumber(int newNumber)
     {
-        text = GetComponentInChildren <TextMeshProUGUI>();
+        text = GetComponentInChildren<TextMeshProUGUI>();
 
         cardNumber = newNumber;
 
@@ -53,4 +79,13 @@ public class Card : MonoBehaviour
         GetComponent<Image>().color = newColor;
     }
 
+    public void Flip(bool isFront)
+    {
+        this.isFront = isFront;
+    }
+
+    public void SetImage(Sprite sprite)
+    {
+        mySpriteImage = sprite;
+    }
 }
