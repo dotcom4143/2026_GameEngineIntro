@@ -1,91 +1,87 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class Card : MonoBehaviour
 {
-    public TextMeshProUGUI text;
+    public Color myColor;
+    public Image cardImage;
+    public TextMeshProUGUI numberText;
+    public Sprite backSprite;
 
-    public int cardNumber;
-
-    public float rotationSpeed;
-
-    public bool isFront = false;
+    private bool isFront = false;
     public bool isMatched = false;
+    public float rotateSpeed = 12f;
 
-    private Sprite mySpriteImage;
-    public Sprite defaultSprite;
+    private CardGame gameManager;
+    private Sprite rewardSprite;
+    private Quaternion targetRotation;
 
-    private Vector3 flipScale = new Vector3(-1, 1, 1);
-    private Vector3 originScale = new Vector3(1, 1, 1);
+    void Awake()
+    {
+        if (cardImage == null) cardImage = GetComponent<Image>();
+        if (numberText == null) numberText = GetComponentInChildren<TextMeshProUGUI>();
+        targetRotation = Quaternion.Euler(0, 180, 0);
+    }
 
-    public CardGame cardGame;
+    public void Setup(Color col, int index, CardGame manager)
+    {
+        myColor = col;
+        gameManager = manager;
+        numberText.text = index.ToString();
+        numberText.gameObject.SetActive(false);
+        cardImage.sprite = backSprite;
+        cardImage.color = Color.white;
+    }
 
     void Update()
     {
-        if (isFront)
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
+
+        if (Quaternion.Angle(transform.rotation, Quaternion.identity) < 90)
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, originScale, rotationSpeed * Time.deltaTime);
-
-            if (text != null)
+            if (isMatched)
             {
-                text.gameObject.SetActive(true);
-                text.transform.localScale = new Vector3(1, 1, 1);
+                cardImage.sprite = rewardSprite;
+                cardImage.color = Color.white;
             }
-
-            if (mySpriteImage != null) GetComponent<Image>().sprite = mySpriteImage;
+            else
+            {
+                cardImage.sprite = null;
+                cardImage.color = myColor;
+            }
+            numberText.gameObject.SetActive(true);
         }
         else
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, flipScale, rotationSpeed * Time.deltaTime);
-
-            if (text != null)
-            {
-                text.gameObject.SetActive(false);
-                text.transform.localScale = new Vector3(-1, 1, 1);
-            }
-
-            GetComponent<Image>().sprite = defaultSprite;
+            cardImage.sprite = backSprite;
+            cardImage.color = Color.white;
+            numberText.gameObject.SetActive(false);
         }
+    }
+
+    public void Flip(bool toFront)
+    {
+        isFront = toFront;
+        targetRotation = isFront ? Quaternion.identity : Quaternion.Euler(0, 180, 0);
+    }
+
+    public void SetMatched(Sprite winSprite)
+    {
+        isMatched = true;
+        rewardSprite = winSprite;
     }
 
     public void ClickCard()
     {
-        if (!isMatched)
+        if (gameManager == null)
         {
-            cardGame.OnClickCard(this);
+            gameManager = Object.FindFirstObjectByType<CardGame>();
         }
-    }
 
-    public void SetStartRotation()
-    {
-        transform.localScale = flipScale;
-        if (text != null) text.gameObject.SetActive(false);
-    }
-
-    public void SetCardNumber(int newNumber)
-    {
-        text = GetComponentInChildren<TextMeshProUGUI>();
-
-        cardNumber = newNumber;
-
-        text.text = cardNumber.ToString();
-    }
-
-    public void ChangeColor(Color newColor)
-    {
-        GetComponent<Image>().color = newColor;
-    }
-
-    public void Flip(bool isFront)
-    {
-        this.isFront = isFront;
-    }
-
-    public void SetImage(Sprite sprite)
-    {
-        mySpriteImage = sprite;
+        if (gameManager != null)
+        {
+            gameManager.OnCardClicked(this);
+        }
     }
 }

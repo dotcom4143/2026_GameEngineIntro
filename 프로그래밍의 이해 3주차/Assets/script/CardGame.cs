@@ -1,84 +1,75 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Collections;
 
 public class CardGame : MonoBehaviour
 {
-    public List<Card> cards;
-    public List<Sprite> sprites;
+    public int totalCardCount = 20; // 인스펙터에서 설정
+    public GameObject cardPrefab;
+    public Transform cardParent; // Grid Layout Group이 붙은 오브젝트
+    public List<Sprite> rewardSprites;
 
+    private List<Card> allCards = new List<Card>();
     private Card firstCard = null;
     private Card secondCard = null;
-
     private bool isChecking = false;
-
-    public int cardPairNum;
-    private int maxPairNum = 14;
-    private int minPairNum = 1;
+    private int matchedCount = 0;
 
     void Start()
     {
-        StartGame();
+        GenerateCards();
     }
 
-    private void StartGame()
+    private void GenerateCards()
     {
-        isChecking = false;
-        List<int> randomPairNumbers = GeneratePairNumbers(cards.Count);
+        int pairCount = totalCardCount / 2;
+        List<Color> colorPairs = new List<Color>();
 
-        for (int i = 0; i < cards.Count; ++i)
+        // 1. 랜덤 색상 페어 생성
+        for (int i = 0; i < pairCount; i++)
         {
-            int num = randomPairNumbers[i];
-            cards[i].SetCardNumber(num);
-
-            if (num < sprites.Count)
-            {
-                cards[i].SetImage(sprites[num]);
-            }
-
-            cards[i].isFront = false;
-            cards[i].isMatched = false;
-            cards[i].ChangeColor(Color.white);
-            cards[i].SetStartRotation();
+            Color randomColor = Random.ColorHSV(0f, 1f, 0.6f, 0.9f, 0.7f, 1f);
+            colorPairs.Add(randomColor);
+            colorPairs.Add(randomColor);
         }
+
+        // 2. 리스트 셔플
+        for (int i = 0; i < colorPairs.Count; i++)
+        {
+            int rnd = Random.Range(0, colorPairs.Count);
+            Color temp = colorPairs[i];
+            colorPairs[i] = colorPairs[rnd];
+            colorPairs[rnd] = temp;
+        }
+
+        // 3. 프리팹 생성 및 데이터 주입
+        for (int i = 0; i < totalCardCount; i++)
+        {
+            GameObject go = Instantiate(cardPrefab, cardParent);
+            Card card = go.GetComponent<Card>();
+            card.Setup(colorPairs[i], i, this);
+            allCards.Add(card);
+        }
+
+        StartCoroutine(RevealAllRoutine());
     }
 
-    private void CheckCard()
+    IEnumerator RevealAllRoutine()
     {
-        if (firstCard.cardNumber == secondCard.cardNumber)
-        {
-            firstCard.isMatched = true;
-            secondCard.isMatched = true;
-
-            firstCard.ChangeColor(Color.black);
-            secondCard.ChangeColor(Color.black);
-
-            firstCard = null;
-            secondCard = null;
-            isChecking = false;
-        }
-        else
-        {
-            Invoke("HideCard", 1.0f);
-        }
-    }
-
-    private void HideCard()
-    {
-        firstCard.isFront = false;
-        secondCard.isFront = false;
-
-        firstCard = null;
-        secondCard = null;
+        isChecking = true;
+        yield return new WaitForSeconds(0.5f);
+        foreach (var c in allCards) c.Flip(true);
+        yield return new WaitForSeconds(2.5f);
+        foreach (var c in allCards) c.Flip(false);
         isChecking = false;
     }
 
-    public void OnClickCard(Card card)
+    public void OnCardClicked(Card card)
     {
-        if (isChecking || card.isMatched || card == firstCard) return;
+        if (isChecking || card == firstCard || card.isMatched) return;
 
-        card.isFront = true;
+        card.Flip(true);
 
         if (firstCard == null)
         {
@@ -87,30 +78,32 @@ public class CardGame : MonoBehaviour
         else
         {
             secondCard = card;
-            isChecking = true;
-            CheckCard();
+            StartCoroutine(CheckMatchRoutine());
         }
     }
 
-    List<int> GeneratePairNumbers(int cardCount)
+    IEnumerator CheckMatchRoutine()
     {
-        int pairCount = cardCount / 2;
-        List<int> newCardNumbers = new List<int>();
+        isChecking = true;
 
-        for (int i = 0; i < pairCount; ++i)
+        if (firstCard.myColor == secondCard.myColor)
         {
-            newCardNumbers.Add(i);
-            newCardNumbers.Add(i);
+            matchedCount++;
+            Sprite randomWinSprite = rewardSprites[Random.Range(0, rewardSprites.Count)];
+            firstCard.SetMatched(randomWinSprite);
+            secondCard.SetMatched(randomWinSprite);
+
+            if (matchedCount == totalCardCount / 2) Debug.Log("Clear!");
+        }
+        else
+        {
+            yield return new WaitForSeconds(1.0f);
+            firstCard.Flip(false);
+            secondCard.Flip(false);
         }
 
-        for (int i = newCardNumbers.Count - 1; i > 0; i--)
-        {
-            int rnd = Random.Range(0, i + 1);
-            int temp = newCardNumbers[i];
-            newCardNumbers[i] = newCardNumbers[rnd];
-            newCardNumbers[rnd] = temp;
-        }
-
-        return newCardNumbers;
+        firstCard = null;
+        secondCard = null;
+        isChecking = false;
     }
 }
