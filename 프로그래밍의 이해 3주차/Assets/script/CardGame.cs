@@ -1,18 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CardGame : MonoBehaviour
 {
-    public int totalCardCount = 20; // 인스펙터에서 설정
+    public int totalCardCount = 20; 
+
     public GameObject cardPrefab;
-    public Transform cardParent; // Grid Layout Group이 붙은 오브젝트
-    public List<Sprite> rewardSprites;
+    public Transform cardParent; 
+    public List<Sprite> cardSprites;
 
     private List<Card> allCards = new List<Card>();
+
     private Card firstCard = null;
     private Card secondCard = null;
+
     private bool isChecking = false;
     private int matchedCount = 0;
 
@@ -24,31 +26,29 @@ public class CardGame : MonoBehaviour
     private void GenerateCards()
     {
         int pairCount = totalCardCount / 2;
-        List<Color> colorPairs = new List<Color>();
+        List<int> cardIndices = new List<int>();
 
-        // 1. 랜덤 색상 페어 생성
         for (int i = 0; i < pairCount; i++)
         {
-            Color randomColor = Random.ColorHSV(0f, 1f, 0.6f, 0.9f, 0.7f, 1f);
-            colorPairs.Add(randomColor);
-            colorPairs.Add(randomColor);
+            cardIndices.Add(i);
+            cardIndices.Add(i);
         }
 
-        // 2. 리스트 셔플
-        for (int i = 0; i < colorPairs.Count; i++)
+        for (int i = 0; i < cardIndices.Count; i++)
         {
-            int rnd = Random.Range(0, colorPairs.Count);
-            Color temp = colorPairs[i];
-            colorPairs[i] = colorPairs[rnd];
-            colorPairs[rnd] = temp;
+            int rnd = Random.Range(0, cardIndices.Count);
+            int temp = cardIndices[i];
+            cardIndices[i] = cardIndices[rnd];
+            cardIndices[rnd] = temp;
         }
 
-        // 3. 프리팹 생성 및 데이터 주입
         for (int i = 0; i < totalCardCount; i++)
         {
             GameObject go = Instantiate(cardPrefab, cardParent);
             Card card = go.GetComponent<Card>();
-            card.Setup(colorPairs[i], i, this);
+            
+            int cardNumber = cardIndices[i];
+            card.Setup(cardNumber, cardSprites[cardNumber], this);
             allCards.Add(card);
         }
 
@@ -60,14 +60,14 @@ public class CardGame : MonoBehaviour
         isChecking = true;
         yield return new WaitForSeconds(0.5f);
         foreach (var c in allCards) c.Flip(true);
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitForSeconds(2.0f);
         foreach (var c in allCards) c.Flip(false);
         isChecking = false;
     }
 
-    public void OnCardClicked(Card card)
+    public void OnClickCard(Card card)
     {
-        if (isChecking || card == firstCard || card.isMatched) return;
+        if (isChecking || card == firstCard || card.isMatched || card.isFront) return;
 
         card.Flip(true);
 
@@ -86,12 +86,11 @@ public class CardGame : MonoBehaviour
     {
         isChecking = true;
 
-        if (firstCard.myColor == secondCard.myColor)
+        if (firstCard.cardNum == secondCard.cardNum)
         {
             matchedCount++;
-            Sprite randomWinSprite = rewardSprites[Random.Range(0, rewardSprites.Count)];
-            firstCard.SetMatched(randomWinSprite);
-            secondCard.SetMatched(randomWinSprite);
+            firstCard.SetMatched();
+            secondCard.SetMatched();
 
             if (matchedCount == totalCardCount / 2) Debug.Log("Clear!");
         }
@@ -106,4 +105,6 @@ public class CardGame : MonoBehaviour
         secondCard = null;
         isChecking = false;
     }
+
+    public bool IsChecking() => isChecking;
 }

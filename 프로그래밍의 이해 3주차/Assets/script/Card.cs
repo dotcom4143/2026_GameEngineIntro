@@ -1,87 +1,51 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-    public Color myColor;
-    public Image cardImage;
-    public TextMeshProUGUI numberText;
-    public Sprite backSprite;
+    public int cardNum;
 
-    private bool isFront = false;
     public bool isMatched = false;
-    public float rotateSpeed = 12f;
+    public bool isFront = false;
 
-    private CardGame gameManager;
-    private Sprite rewardSprite;
-    private Quaternion targetRotation;
+    private CardGame cardGame;
+    private CardFlip flipper;
+
+    public TextMeshProUGUI numberText;
+    public Image frontImage;
 
     void Awake()
     {
-        if (cardImage == null) cardImage = GetComponent<Image>();
+        flipper = GetComponent<CardFlip>();
         if (numberText == null) numberText = GetComponentInChildren<TextMeshProUGUI>();
-        targetRotation = Quaternion.Euler(0, 180, 0);
     }
 
-    public void Setup(Color col, int index, CardGame manager)
+    public void Setup(int num, Sprite sprite, CardGame game)
     {
-        myColor = col;
-        gameManager = manager;
-        numberText.text = index.ToString();
-        numberText.gameObject.SetActive(false);
-        cardImage.sprite = backSprite;
-        cardImage.color = Color.white;
+        cardNum = num;
+        cardGame = game;
+        
+        if (numberText != null) numberText.text = cardNum.ToString();
+        if (frontImage != null) frontImage.sprite = sprite;
     }
 
-    void Update()
+    public void ClickCard()
     {
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotateSpeed);
-
-        if (Quaternion.Angle(transform.rotation, Quaternion.identity) < 90)
-        {
-            if (isMatched)
-            {
-                cardImage.sprite = rewardSprite;
-                cardImage.color = Color.white;
-            }
-            else
-            {
-                cardImage.sprite = null;
-                cardImage.color = myColor;
-            }
-            numberText.gameObject.SetActive(true);
-        }
-        else
-        {
-            cardImage.sprite = backSprite;
-            cardImage.color = Color.white;
-            numberText.gameObject.SetActive(false);
-        }
+        if (isMatched || isFront || cardGame.IsChecking()) return;
+        
+        cardGame.OnClickCard(this);
     }
 
     public void Flip(bool toFront)
     {
         isFront = toFront;
-        targetRotation = isFront ? Quaternion.identity : Quaternion.Euler(0, 180, 0);
+        flipper.Flip(toFront);
     }
 
-    public void SetMatched(Sprite winSprite)
+    public void SetMatched()
     {
         isMatched = true;
-        rewardSprite = winSprite;
-    }
-
-    public void ClickCard()
-    {
-        if (gameManager == null)
-        {
-            gameManager = Object.FindFirstObjectByType<CardGame>();
-        }
-
-        if (gameManager != null)
-        {
-            gameManager.OnCardClicked(this);
-        }
+        if (frontImage != null) frontImage.color = Color.yellow;
     }
 }

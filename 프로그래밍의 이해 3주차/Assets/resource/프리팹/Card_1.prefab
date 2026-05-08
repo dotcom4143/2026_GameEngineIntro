@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 6819997599921411978}
   - component: {fileID: 2204563689828179479}
   - component: {fileID: 1532232861349460430}
+  - component: {fileID: 6469684126043396055}
   m_Layer: 5
   m_Name: Card_1
   m_TagString: Untagged
@@ -227,12 +228,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29053e8f490b9a14783fd7bb7605b762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
-  myColor: {r: 0, g: 0, b: 0, a: 0}
-  cardImage: {fileID: 0}
-  numberText: {fileID: 8923817806619705049}
-  backSprite: {fileID: 0}
+  cardNum: 0
   isMatched: 0
-  rotateSpeed: 0
+  isFront: 0
+  numberText: {fileID: 8923817806619705049}
+  frontImage: {fileID: 0}
 --- !u!114 &1532232861349460430
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,3 +289,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &6469684126043396055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6489617695834991491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cabde1eba87861c46a4075136d701648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardFlip
+  rotateSpeed: 10
+  frontContent: {fileID: 0}
+  backContent: {fileID: 0}
