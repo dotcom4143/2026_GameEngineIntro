@@ -1,51 +1,59 @@
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
+    [Header("데이터")]
     public int cardNum;
-
     public bool isMatched = false;
     public bool isFront = false;
 
-    private CardGame cardGame;
-    private CardFlip flipper;
+    [Header("연결")]
+    public Image frontImage; 
+    private CardFlip flipScript;
+    private CardGame gameManager;
 
-    public TextMeshProUGUI numberText;
-    public Image frontImage;
-
-    void Awake()
+    private void Awake()
     {
-        flipper = GetComponent<CardFlip>();
-        if (numberText == null) numberText = GetComponentInChildren<TextMeshProUGUI>();
+        flipScript = GetComponent<CardFlip>();
     }
 
-    public void Setup(int num, Sprite sprite, CardGame game)
+    public void Setup(int num, Sprite sprite, Color color, CardGame manager)
     {
         cardNum = num;
-        cardGame = game;
+        gameManager = manager;
         
-        if (numberText != null) numberText.text = cardNum.ToString();
-        if (frontImage != null) frontImage.sprite = sprite;
+        if (frontImage != null)
+        {
+            frontImage.sprite = sprite;
+            frontImage.color = color;
+        }
+
+        // 초기 상태 설정
+        isMatched = false;
+        isFront = false;
     }
 
-    public void ClickCard()
-    {
-        if (isMatched || isFront || cardGame.IsChecking()) return;
-        
-        cardGame.OnClickCard(this);
-    }
-
+    // [에러 해결] 카드 뒤집기 명령을 처리하는 함수
     public void Flip(bool toFront)
     {
         isFront = toFront;
-        flipper.Flip(toFront);
+        if (flipScript != null)
+        {
+            flipScript.Flip(toFront);
+        }
     }
 
     public void SetMatched()
     {
         isMatched = true;
-        if (frontImage != null) frontImage.color = Color.yellow;
+    }
+
+    public void OnCardClick()
+    {
+        if (gameManager != null)
+        {
+            gameManager.OnClickCard(this);
+        }
     }
 }

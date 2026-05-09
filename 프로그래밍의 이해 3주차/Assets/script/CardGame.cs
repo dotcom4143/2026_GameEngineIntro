@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class CardGame : MonoBehaviour
 {
-    public int totalCardCount = 20; 
-
+    [Header("프리팹 설정")]
     public GameObject cardPrefab;
-    public Transform cardParent; 
-    public List<Sprite> cardSprites;
+    public Transform cardParent;
+    public int totalCardCount = 12;
 
+    [Header("데이터 설정")]
+    public List<Sprite> cardSprites;
     private List<Card> allCards = new List<Card>();
 
+    [Header("게임 로직 관련")]
     private Card firstCard = null;
     private Card secondCard = null;
-
     private bool isChecking = false;
     private int matchedCount = 0;
 
@@ -25,10 +26,8 @@ public class CardGame : MonoBehaviour
 
     private void GenerateCards()
     {
-        int pairCount = totalCardCount / 2;
         List<int> cardIndices = new List<int>();
-
-        for (int i = 0; i < pairCount; i++)
+        for (int i = 0; i < totalCardCount / 2; i++)
         {
             cardIndices.Add(i);
             cardIndices.Add(i);
@@ -48,9 +47,20 @@ public class CardGame : MonoBehaviour
             Card card = go.GetComponent<Card>();
             
             int cardNumber = cardIndices[i];
-            card.Setup(cardNumber, cardSprites[cardNumber], this);
+
+            int spriteIndex = cardNumber % cardSprites.Count;
+            Sprite selectedSprite = cardSprites[spriteIndex];
+
+            // [핵심] 짝꿍별 고유 색상 (번호를 시드로 사용)
+            Random.InitState(cardNumber); 
+            Color pairColor = Color.HSVToRGB(Random.value, 0.4f, 0.9f); 
+            pairColor.a = 1f; 
+
+            card.Setup(cardNumber, selectedSprite, pairColor, this);
             allCards.Add(card);
         }
+
+        Random.InitState((int)System.DateTime.Now.Ticks);
 
         StartCoroutine(RevealAllRoutine());
     }
@@ -92,7 +102,7 @@ public class CardGame : MonoBehaviour
             firstCard.SetMatched();
             secondCard.SetMatched();
 
-            if (matchedCount == totalCardCount / 2) Debug.Log("Clear!");
+            if (matchedCount == totalCardCount / 2) Debug.Log("모든 카드를 맞췄습니다! Clear!");
         }
         else
         {
