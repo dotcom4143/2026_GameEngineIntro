@@ -611,34 +611,6 @@ PrefabInstance:
       propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6318846699491752967, guid: ff98065da32b75c4b8223643d890a129, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6489617695834991491, guid: ff98065da32b75c4b8223643d890a129, type: 3}
       propertyPath: m_Name
       value: Card_1

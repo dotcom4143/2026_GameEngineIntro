@@ -1,44 +1,40 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CardFlip : MonoBehaviour
 {
+    [Header("연결 설정")]
+    public Transform cardVisual; 
+    public GameObject frontContent; 
+    public GameObject backContent;  
+
     [Header("회전 설정")]
     public float rotateSpeed = 10f;
-    private Quaternion targetRotation;
-    private Quaternion flipRotation = Quaternion.Euler(0, 180f, 0);
-    private Quaternion originRotation = Quaternion.Euler(0, 0, 0);
+    public bool isFront = false;
 
-    [Header("컴포넌트 연결")]
-    public GameObject frontContent;
-    public GameObject backContent;
-
-    private void Awake()
+    void Update()
     {
-        targetRotation = flipRotation;
-        transform.rotation = flipRotation;
-        UpdateVisibility(180f);
+        if (cardVisual == null) return;
+
+        Quaternion targetRotation = isFront ? Quaternion.Euler(0, 180, 0) : Quaternion.Euler(0, 0, 0);
+        
+        cardVisual.rotation = Quaternion.Slerp(cardVisual.rotation, targetRotation, Time.deltaTime * rotateSpeed);
+
+        float yAngle = cardVisual.rotation.eulerAngles.y;
+        if (yAngle > 180) yAngle -= 360;
+
+        bool showFront = Mathf.Abs(yAngle) > 90f; 
+
+        if (frontContent != null) frontContent.SetActive(showFront);
+        if (backContent != null) backContent.SetActive(!showFront);
     }
 
-    private void Update()
+    public void ClickCard()
     {
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
-
-        UpdateVisibility(transform.rotation.eulerAngles.y);
+        isFront = !isFront;
     }
 
     public void Flip(bool toFront)
     {
-        targetRotation = toFront ? originRotation : flipRotation;
-    }
-
-    private void UpdateVisibility(float yAngle)
-    {
-        if (yAngle > 180) yAngle -= 360;
-
-        bool showFront = Mathf.Abs(yAngle) < 90f;
-
-        if (frontContent != null) frontContent.SetActive(showFront);
-        if (backContent != null) backContent.SetActive(!showFront);
+        isFront = toFront;
     }
 }
