@@ -7,7 +7,10 @@ public class CardGame : MonoBehaviour
     [Header("프리팹 설정")]
     public GameObject cardPrefab;
     public Transform cardParent;
-    public int totalCardCount = 12;
+    
+    [Header("카드 설정")]
+    public int pairCount = 10;
+    private int totalCardCount;
 
     [Header("데이터 설정")]
     public List<Sprite> cardSprites;
@@ -21,13 +24,14 @@ public class CardGame : MonoBehaviour
 
     void Start()
     {
+        totalCardCount = pairCount * 2;
         GenerateCards();
     }
 
     private void GenerateCards()
     {
         List<int> cardIndices = new List<int>();
-        for (int i = 0; i < totalCardCount / 2; i++)
+        for (int i = 0; i < pairCount; i++)
         {
             cardIndices.Add(i);
             cardIndices.Add(i);
@@ -47,11 +51,9 @@ public class CardGame : MonoBehaviour
             Card card = go.GetComponent<Card>();
             
             int cardNumber = cardIndices[i];
-
             int spriteIndex = cardNumber % cardSprites.Count;
             Sprite selectedSprite = cardSprites[spriteIndex];
 
-            // [핵심] 짝꿍별 고유 색상 (번호를 시드로 사용)
             Random.InitState(cardNumber); 
             Color pairColor = Color.HSVToRGB(Random.value, 0.4f, 0.9f); 
             pairColor.a = 1f; 
@@ -61,7 +63,6 @@ public class CardGame : MonoBehaviour
         }
 
         Random.InitState((int)System.DateTime.Now.Ticks);
-
         StartCoroutine(RevealAllRoutine());
     }
 
@@ -102,7 +103,7 @@ public class CardGame : MonoBehaviour
             firstCard.SetMatched();
             secondCard.SetMatched();
 
-            if (matchedCount == totalCardCount / 2) Debug.Log("모든 카드를 맞췄습니다! Clear!");
+            if (matchedCount == pairCount) Debug.Log("모든 카드를 맞췄습니다!");
         }
         else
         {
@@ -115,6 +116,4 @@ public class CardGame : MonoBehaviour
         secondCard = null;
         isChecking = false;
     }
-
-    public bool IsChecking() => isChecking;
 }
