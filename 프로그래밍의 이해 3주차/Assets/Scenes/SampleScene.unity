@@ -704,7 +704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardGame
   cardPrefab: {fileID: 6489617695834991491, guid: ff98065da32b75c4b8223643d890a129, type: 3}
   cardParent: {fileID: 1329500032}
-  totalCardCount: 46
+  pairCount: 12
   cardSprites:
   - {fileID: 21300000, guid: 4c12351bc147fe54e8e0483a7938a1af, type: 3}
   - {fileID: 21300000, guid: 42815a2702b00ee4ca80b7d721e28875, type: 3}
